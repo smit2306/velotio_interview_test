@@ -1,0 +1,154 @@
+# =====================================================================================================================
+# CUSTOMERS: a base table for customers
+# =====================================================================================================================
+-> customer_id: primary key
+-> name: name of the customer
+-> city_id: city of the customer. Foreign key references city_id of the CITY table.
+-> email: email id
+-> sign_up_date: sign up date of the customer
+-> mobile_number: contact details of the customer
+-> other_details: other miscellaneous details
+
+# =====================================================================================================================
+# CITY: a base table for cities
+# =====================================================================================================================
+-> city_id: primary key
+-> city_name: name of the city
+-> state_name: name of the state
+-> pin_code: pin code of the city
+
+# =====================================================================================================================
+# RESTAURANTS: a base table for restaurants
+# =====================================================================================================================
+-> restaurant_id: primary key
+-> address: address of the restaurant
+-> city_id: foreign key references city_id column of the CITY table. City id of the restuarant.
+-> menu_id: foreign key. references menu_id of the MENU table.
+
+# =====================================================================================================================
+# CUISINES: a simple enum like table for cuisines
+# =====================================================================================================================
+-> cuisine_id: primary key
+-> cusine_name: name of the cuisine
+
+# =====================================================================================================================
+# MENU: a table for maintaining menus of different restaurants
+# =====================================================================================================================
+-> id: primary key
+-> menu_id: Id of the menu. Unique to each restaurant_id
+-> restaurant_id: foreign key references restaurant_id of the RESTAURANTS table.
+-> food_item_id: Id of the food items in a menu
+-> food_item_name: Name of food item
+-> food_item_cuisine_id: foreign key references the cuisine_id of the CUISINES table. for better categorization of
+the food items
+-> food_item_price: price of the food item
+-> food_item_description: description of the food item
+-> food_item_ingredients: ingredients of the food item
+-> food_item_available: flag if the item is available for serving
+
+# =====================================================================================================================
+# OFFERS: a generic offers table
+# =====================================================================================================================
+-> id: primary key
+-> start_date: Start date of the offer
+-> end_date: end date of the offer
+-> start_time: start time of the offer
+-> end_time: end time of the offer
+-> offer_price: discounted price
+
+# =====================================================================================================================
+# CURRENT_OFFERS: our main active offers table that keeps track of offers on a specific menu item
+# =====================================================================================================================
+-> id: primary key
+-> offer_id: foreign key references id primary key of the offers table. Tells which offer is applicable on the
+food item
+-> menu_item_id: foreign key references primary key of the MENU id
+
+
+# =====================================================================================================================
+# PLACED_ORDERS: our main table for maintaining orders
+# =====================================================================================================================
+-> id: primary key
+-> restuarant_id: foreign key references the restuarant_id primary key in RESTAURANTS table
+-> customer_id: foreign key references the customer_id primary key in CUSTOMERS table
+-> order_place_time: time at which order was placed
+-> estimated_delivery_time: self explanatory
+-> actual_delivery_time: self explanatory
+-> delivery_destination: location where the food is to be delivered
+-> total_order_amount: amount payable for the order
+-> discount: discount amount
+-> payment_method: self explanatory
+-> payment_status: paid or not paid..etc
+-> comments: some comments for the order
+
+
+# =====================================================================================================================
+# ORDER_DETIALS: this table gives us details of all the specific items in an order and their quantities
+like a Bill of materials of an order id
+# =====================================================================================================================
+-> id: primary key
+-> placed_order_id: foreign key references the primary of the PLACED_ORDERS table
+-> menu_item_id: foreign key references the primary key of the menu table. this will tell which food item is ordered by
+the user
+-> item_price: price of 1 unit of said food item
+-> item_quantity: quantity of the said food item ordered by the user
+-> offer_id: foreign key references the offer_id of the CURRENT_OFFERS table.
+
+
+# =====================================================================================================================
+# ORDER_STATUS: a table for keeping track of orders, whether they are delivered or not
+# =====================================================================================================================
+-> id: primary key
+-> order_id: foreign key references the primary key of the PLACED_ORDERS TABLE.
+-> status_id: foreign key references the primary key of the STATUSES table.
+-> last_update_ts: last update timestamp
+
+
+# =====================================================================================================================
+# STATUSES: this is like enum for the status of any order
+# =====================================================================================================================
+-> id: primary key
+-> status_name: like in_preparation, out_for_delivery, delivered etc.
+
+
+# =====================================================================================================================
+# COMMENTS:
+# =====================================================================================================================
+-> id: primary key
+-> order_id: foreign key references the order_id of the PLACED_ORDERS table
+-> customer_id: foreign key references the primary of the CUSTOMERS table
+-> is_complaint: boolean flag
+-> comment_text: text of the comment.
+
+
+# =====================================================================================================================
+# REVIEWS: a table for maintaing reviews of a restuarant
+# =====================================================================================================================
+-> review_id: primary key
+-> customer_id: foreign key references the primary of the CUSTOMERS table
+-> num_orders_placed: can be calculated on insert..we should only allow users with atleast one order placed
+to review a restaurant
+-> restaurant_id: foreign key references the primary key of the RESTAURANTS table
+-> review_text: any text associated with a review
+-> review_stars: stars out of 5
+-> is_positive: a boolean flag or checking if the review is positive or negative
+-> date_posted: date when the review was posted
+
+
+# some apis
+
+# api's for restuarants or business owners
+
+1. add item to current menu
+input: necessary inputs for our menu table in database design
+2. remove an item from menu
+3. update an item
+4. change availability of an item
+5. change status of order based on order id
+
+# user facing apis for front end develpers
+1. a search api for checking restuarants based on area, name or cuisine, we have all these details
+in our database tables
+2. an api to add a review to a resturant.
+3. we can have data aggregation apis, that give out details about a specific restuarant or an area
+like "zip code with highly rated restaurants" etc, to provide recommendations to user
